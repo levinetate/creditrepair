@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Credit Dispute Helper</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header no-print">
+    <h1>Credit Dispute Helper</h1>
+    <p class="tagline">Track errors on your credit reports and write formal FCRA dispute letters.</p>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="tracker" role="tab">Disputes</button>
+      <button class="tab" data-tab="letters" role="tab">Letters</button>
+      <button class="tab" data-tab="profile" role="tab">My info</button>
+      <button class="tab" data-tab="guide" role="tab">Know your rights</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Dispute tracker -->
+    <section id="tracker" class="panel active no-print">
+      <div class="deadline-summary" id="deadline-summary"></div>
+
+      <details class="card" id="dispute-form-card" open>
+        <summary><h2 id="dispute-form-title">Add an item to dispute</h2></summary>
+        <form id="dispute-form">
+          <input type="hidden" name="id">
+          <div class="grid">
+            <label>Creditor or company name
+              <input name="creditor" required placeholder="e.g. ABC Bank">
+            </label>
+            <label>Account number (last 4 is fine)
+              <input name="account" placeholder="e.g. ****1234">
+            </label>
+            <label>Credit bureau reporting it
+              <select name="bureau" required>
+                <option value="equifax">Equifax</option>
+                <option value="experian">Experian</option>
+                <option value="transunion">TransUnion</option>
+              </select>
+            </label>
+            <label>Kind of item
+              <select name="itemType" id="item-type"></select>
+            </label>
+            <label>What's wrong with it
+              <select name="errorType" id="error-type"></select>
+              <span class="muted small" id="item-tip"></span>
+            </label>
+            <label>Date of first delinquency (if negative)
+              <input type="date" name="dofd">
+              <span class="muted small">The date you first fell behind and never caught up. It starts the 7-year reporting clock.</span>
+            </label>
+            <label>Creditor's mailing address (for direct disputes)
+              <textarea name="creditorAddress" rows="3" placeholder="Dispute address from your credit report or statement"></textarea>
+            </label>
+            <label>What is wrong, in your own words
+              <textarea name="details" rows="3" required placeholder="e.g. Report shows a 60-day late payment in March 2025. I paid on time; bank statement attached."></textarea>
+            </label>
+            <label>What it should say instead
+              <textarea name="correction" rows="2" placeholder="e.g. Remove the late payment and show the account as current."></textarea>
+            </label>
+            <label>Documents you will enclose (one per line)
+              <textarea name="enclosures" rows="2" placeholder="e.g. Bank statement for March 2025"></textarea>
+            </label>
+            <label>Date dispute was mailed
+              <input type="date" name="dateSent">
+            </label>
+            <label>Status
+              <select name="status">
+                <option value="draft">Not sent yet</option>
+                <option value="sent">Sent, waiting for response</option>
+                <option value="corrected">Corrected / deleted</option>
+                <option value="verified">Bureau says verified</option>
+                <option value="closed">Closed</option>
+              </select>
+            </label>
+          </div>
+          <div class="actions">
+            <button type="submit" class="primary">Save item</button>
+            <button type="button" id="cancel-edit" class="hidden">Cancel edit</button>
+          </div>
+        </form>
+      </details>
+
+      <h2>Your disputes</h2>
+      <div id="dispute-list"></div>
+      <p class="muted small">Everything you enter stays in this browser on this device. Nothing is sent anywhere.
+        <button type="button" class="link" id="export-data">Download a backup</button> ·
+        <label class="link file-link">Restore a backup<input type="file" id="import-data" accept="application/json" hidden></label>
+      </p>
+    </section>
+
+    <!-- Letters -->
+    <section id="letters" class="panel">
+      <div class="card no-print">
+        <h2>Write a letter</h2>
+        <div class="grid">
+          <label>Dispute item
+            <select id="letter-dispute"></select>
+          </label>
+          <label>Letter type
+            <select id="letter-type">
+              <option value="bureau611">Dispute to the credit bureau (FCRA § 611)</option>
+              <option value="furnisher623">Direct dispute to the creditor (FCRA § 623)</option>
+              <option value="verification">Follow-up: how was it verified? (§ 611(a)(7))</option>
+              <option value="block605b">Identity theft block request (FCRA § 605B)</option>
+            </select>
+          </label>
+        </div>
+        <p class="muted small" id="letter-hint"></p>
+        <div class="actions">
+          <button type="button" class="primary" id="print-letter">Print or save as PDF</button>
+          <button type="button" id="copy-letter">Copy text</button>
+        </div>
+        <p class="muted small">You can edit the letter below before printing. Send it by certified mail with return receipt and keep copies of everything.</p>
+      </div>
+      <article id="letter-output" class="letter" contenteditable="true" spellcheck="true"></article>
+    </section>
+
+    <!-- Profile -->
+    <section id="profile" class="panel no-print">
+      <div class="card">
+        <h2>My information</h2>
+        <p class="muted">Used to fill in your letters. Stored only in this browser.</p>
+        <form id="profile-form">
+          <div class="grid">
+            <label>Full legal name <input name="name" autocomplete="name"></label>
+            <label>Street address <input name="street" autocomplete="street-address"></label>
+            <label>City, State ZIP <input name="cityStateZip" placeholder="e.g. Atlanta, GA 30301"></label>
+            <label>Date of birth <input name="dob" type="date"></label>
+            <label>Last 4 digits of SSN <input name="ssn4" maxlength="4" inputmode="numeric" pattern="[0-9]{4}"></label>
+            <label>Phone (optional) <input name="phone" autocomplete="tel"></label>
+            <label>Previous address, if moved in last 2 years (optional) <input name="prevAddress"></label>
+          </div>
+          <div class="actions">
+            <button type="submit" class="primary">Save my info</button>
+            <span id="profile-saved" class="muted hidden">Saved.</span>
+          </div>
+        </form>
+        <p class="muted small">Tip: bureaus may ask for the full SSN to find your file. Write it in by hand on the printed letter rather than storing it here.</p>
+      </div>
+    </section>
+
+    <!-- Guide -->
+    <section id="guide" class="panel no-print">
+      <div class="card guide">
+        <h2>Know your rights under the Fair Credit Reporting Act</h2>
+        <p class="notice">This app gives general information, not legal advice. For a complicated situation, talk to a consumer attorney or a nonprofit credit counselor.</p>
+
+        <h3>Your basic rights</h3>
+        <ul>
+          <li><strong>Free reports.</strong> You can get your credit reports from all three bureaus for free at <a href="https://www.annualcreditreport.com" target="_blank" rel="noopener">AnnualCreditReport.com</a>, the only official site.</li>
+          <li><strong>Right to dispute (§ 611, 15 U.S.C. § 1681i).</strong> If a bureau's report has something incomplete or wrong, you can dispute it. The bureau must investigate, usually within 30 days (45 days if you send more information during the 30 days, or if the dispute follows your free annual report).</li>
+          <li><strong>Results in writing.</strong> The bureau must send you the results within 5 business days after it finishes, and a free updated report if anything changed.</li>
+          <li><strong>Unverifiable items come off.</strong> If the information can't be verified, it must be corrected or deleted.</li>
+          <li><strong>Ask how it was verified (§ 611(a)(7)).</strong> If the bureau says an item is verified, you can ask for a description of how it checked, including the name, address and phone number of the company it contacted. It must answer within 15 days of your request.</li>
+          <li><strong>Dispute the creditor directly (§ 623, 15 U.S.C. § 1681s-2).</strong> You can also dispute with the company that reported the item. It must investigate and respond, normally within 30 days.</li>
+          <li><strong>Add a statement.</strong> If the dispute doesn't resolve it, you can ask the bureau to add a short statement to your file.</li>
+          <li><strong>Old negative items expire (§ 605).</strong> Most negative information can't be reported after 7 years. Chapter 7 bankruptcies can stay 10 years.</li>
+          <li><strong>Identity theft block (§ 605B, 15 U.S.C. § 1681c-2).</strong> If an account came from identity theft, the bureau must block it within 4 business days after getting your identity theft report, proof of identity, and a letter naming the items.</li>
+          <li><strong>You can sue.</strong> If a bureau or creditor willfully or negligently breaks the FCRA, you may be able to recover damages and attorney's fees.</li>
+        </ul>
+
+        <h3>A simple process</h3>
+        <ol>
+          <li>Pull all three reports and mark every error.</li>
+          <li>Gather proof: statements, payment confirmations, letters, ID.</li>
+          <li>Add each error in the <em>Disputes</em> tab, then print a § 611 letter for each bureau that shows it. Also send a § 623 letter to the creditor if you like.</li>
+          <li>Mail by certified mail, return receipt requested. Record the date you mailed it.</li>
+          <li>Watch the deadline. If the bureau says "verified," send the follow-up letter asking how.</li>
+          <li>If you still can't get it fixed, file a complaint with the CFPB.</li>
+        </ol>
+
+        <h3>Common negative items and what to check</h3>
+        <dl class="item-guide">
+          <dt>Late payments</dt>
+          <dd>Stay 7 years from the late payment. Compare each month's 30/60/90-day code with your bank records. A payment made during an agreed forbearance or deferment, or made on time but posted late, can be disputed. If the late was accurate, you can still ask the creditor for a "goodwill" removal, but they don't have to agree.</dd>
+          <dt>Charge-offs</dt>
+          <dd>The creditor wrote the debt off as a loss, but you may still owe it. It stays 7 years from the date of first delinquency (plus 180 days), and that date can't be moved forward when the debt is sold. If the account was sold to a collector, the original creditor should show a $0 balance. If you paid or settled it, it should say so.</dd>
+          <dt>Repossessions</dt>
+          <dd>Stay 7 years from the first missed payment. After the sale, the lender must credit what the vehicle sold for. Check that the deficiency balance matches the sale notice you received, and that a voluntary surrender isn't reported as an involuntary repo.</dd>
+          <dt>Collections</dt>
+          <dd>Keep the original debt's 7-year clock. Watch for the same debt listed by more than one collector, or a newer delinquency date than the original account. Under the Fair Debt Collection Practices Act you can also ask the collector to validate the debt within 30 days of their first notice.</dd>
+          <dt>Foreclosures</dt>
+          <dd>Stay 7 years. A short sale or deed in lieu shouldn't be labeled a foreclosure, and the mortgage shouldn't keep showing a balance afterwards.</dd>
+          <dt>Bankruptcy</dt>
+          <dd>Chapter 7 can stay 10 years from filing, Chapter 13 usually 7. Every debt discharged in it should show $0 and "included in bankruptcy," not past due.</dd>
+          <dt>Judgments and tax liens</dt>
+          <dd>Equifax, Experian and TransUnion stopped including civil judgments and tax liens in credit reports in 2017–2018. If one shows up, dispute it. For federal tax liens, see <a href="https://www.irs.gov/businesses/small-businesses-self-employed/understanding-a-federal-tax-lien" target="_blank" rel="noopener">IRS: Understanding a federal tax lien</a> and how to get a lien released or withdrawn.</dd>
+          <dt>Hard inquiries</dt>
+          <dd>Stay 2 years and only matter for about one. Dispute any you didn't authorize, and check for identity theft if you see several you don't recognize.</dd>
+        </dl>
+
+        <h3>Credit bureau dispute addresses</h3>
+        <p class="muted small">These are the addresses the bureaus have published for mailed disputes. Check each bureau's website before mailing, as they can change.</p>
+        <ul id="bureau-addresses"></ul>
+
+        <h3>Identity theft and the IRS</h3>
+        <ul>
+          <li>Report identity theft and get your official Identity Theft Report at <a href="https://www.identitytheft.gov" target="_blank" rel="noopener">IdentityTheft.gov</a> (FTC). You'll need this report for a § 605B block.</li>
+          <li>If someone used your Social Security number to file a tax return, or the IRS tells you about a return you didn't file, follow the IRS steps at <a href="https://www.irs.gov/identity-theft-central" target="_blank" rel="noopener">IRS Identity Theft Central</a>. You may need <a href="https://www.irs.gov/forms-pubs/about-form-14039" target="_blank" rel="noopener">Form 14039, Identity Theft Affidavit</a>.</li>
+          <li>Get an <a href="https://www.irs.gov/identity-theft-fraud-scams/get-an-identity-protection-pin" target="_blank" rel="noopener">IRS Identity Protection PIN</a> to stop others from filing a return in your name.</li>
+          <li>To prove income or tax filing for a lender, you can get a free transcript from <a href="https://www.irs.gov/individuals/get-transcript" target="_blank" rel="noopener">IRS Get Transcript</a>.</li>
+        </ul>
+
+        <h3>Official sources</h3>
+        <ul>
+          <li><a href="https://www.ftc.gov/legal-library/browse/statutes/fair-credit-reporting-act" target="_blank" rel="noopener">Full text of the Fair Credit Reporting Act (FTC)</a></li>
+          <li><a href="https://www.consumerfinance.gov/consumer-tools/credit-reports-and-scores/" target="_blank" rel="noopener">CFPB: Credit reports and scores</a></li>
+          <li><a href="https://www.consumerfinance.gov/complaint/" target="_blank" rel="noopener">Submit a complaint to the CFPB</a></li>
+          <li><a href="https://consumer.ftc.gov/articles/disputing-errors-your-credit-reports" target="_blank" rel="noopener">FTC: Disputing errors on your credit reports</a></li>
+        </ul>
+
+        <h3>Watch out for scams</h3>
+        <p>No one can legally remove accurate, timely negative information. Under the Credit Repair Organizations Act, a credit repair company can't charge you before it finishes the work it promised. Everything this app does, you can do yourself for free.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="letters.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
